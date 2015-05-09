@@ -22,6 +22,13 @@ namespace Tests.Parser
         }
 
         [Test()]
+        public void ParseStringWithLeadingAndTrailingWhitespaces()
+        {
+            JsonParser testInstance = new JsonParser();
+            Assert.AreEqual(" HubaBuba\n \t", testInstance.Parse("\" HubaBuba\\n \\t\""));
+        }
+
+        [Test()]
         public void ParseStringWithEscapes()
         {
             JsonParser testInstance = new JsonParser();
@@ -37,62 +44,35 @@ namespace Tests.Parser
         }
 
         [Test()]
-        public void ParseStringWithMissingDelimiter()
+        [ExpectedException(typeof(FormatException))]
+        public void ThrowsWhenDelimiterOfStringIsMissing()
         {
-            try
-            {
-                JsonParser testInstance = new JsonParser();
-                testInstance.Parse("Hallo\"");
-                Assert.Fail();
-            }
-            catch (FormatException)
-            { 
-            
-            }
-            catch (Exception)
-            {
-                Assert.Fail();
-            }
+            JsonParser testInstance = new JsonParser();
+            testInstance.Parse("Hallo\"");
         }
 
         [Test()]
-        public void ParseStringWithInvalidEscapes()
+        [ExpectedException(typeof(FormatException))]
+        public void ThrowsWhenStringContainsInvalidEscapes()
         {
-            try
-            {
-                JsonParser testInstance = new JsonParser();
-                testInstance.Parse("\"Hallo\\m\"");
-                Assert.Fail();
-            }
-            catch (FormatException)
-            { 
-            }
+            JsonParser testInstance = new JsonParser();
+            testInstance.Parse("\"Hallo\\m\"");
         }
 
         [Test()]
-        public void ParseStringWithInvalidUnicodeSequence()
+        [ExpectedException(typeof(FormatException))]
+        public void ThrowsWhenStringContainsInvalidUnicodeSequence()
         {
-            try
-            {
                 JsonParser testInstance = new JsonParser();
                 testInstance.Parse("\"\\uZZZZ\"");
-                Assert.Fail();
-            }
-            catch (FormatException)
-            { }
         }
 
         [Test()]
-        public void ParseStringWithTruncatedUnicodeSequence()
+        [ExpectedException(typeof(FormatException))]
+        public void ThrowsWhenStringContainsTruncatedUnicodeSequence()
         {
-            try
-            {
                 JsonParser testInstance = new JsonParser();
                 testInstance.Parse("\"\\u012");
-                Assert.Fail();
-            }
-            catch (FormatException)
-            { }
-        } 
+        }
     }
 }
