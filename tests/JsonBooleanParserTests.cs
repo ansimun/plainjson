@@ -22,17 +22,11 @@ namespace Tests.Parser
         }
 
         [Test()]
+        [ExpectedException(typeof(FormatException))]
         public void ParseInvalidTrueValue()
         {
-            try
-            {
-                JsonParser testInstance = new JsonParser();
-                testInstance.Parse("True");
-                Assert.Fail();
-            }
-            catch (FormatException)
-            { 
-            }
+            JsonParser testInstance = new JsonParser();
+            testInstance.Parse("True");
         }
     }
 }
