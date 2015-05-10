@@ -22,39 +22,5 @@ namespace Tests.Parser
             JsonParser testInstance = new JsonParser();
             testInstance.Parse("");
         }
-
-        [Test()]
-        public void ParsePrettifiedObject()
-        {
-            JsonParser testInstance = new JsonParser();
-            Hashtable result = testInstance.Parse("{"
-                + "\n  \"A\": true,"
-                + "\n  \"B\": 123.4e7,"
-                + "\n  \"C\": ["
-                + "\n    \"test\","
-                + "\n    20"
-                + "\n  ]"
-                + "\n}") as Hashtable;
-
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.ContainsKey("A"));
-            Assert.AreEqual(true, (bool)result["A"]);
-            Assert.IsTrue(result.ContainsKey("B"));
-            Assert.AreEqual(123.4e7, (double)result["B"]);
-            Assert.IsTrue(result.ContainsKey("C"));
-            Assert.AreEqual(2, (result["C"] as IList).Count);
-            Assert.AreEqual("test", (result["C"] as IList)[0]);
-            Assert.AreEqual(20.0, (result["C"] as IList)[1]);
-        }
-
-        [Test()]
-        [ExpectedException(typeof(FormatException))]
-        public void ParseImplicitNewLine()
-        {
-            JsonParser testInstance = new JsonParser();
-            string text = "{ \"name\": \"Line1\nLine2\" }";
-
-            testInstance.Parse(text);
-        }
     }
 }

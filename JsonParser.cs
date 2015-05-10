@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Text;
 using System.Globalization;
+using System.Text;
 
 namespace Json
 {
@@ -97,7 +97,7 @@ namespace Json
             {
                 if (this.currentIndex >= this.characters.Length)
                 {
-                    string message = string.Format("expected character at position {0} but is out of range",
+                    string message = string.Format("Expected character at position {0} but is out of range.",
                         this.currentIndex);
                     throw new FormatException(message);
                 }
@@ -117,16 +117,17 @@ namespace Json
         private void Initialize(string json)
         {
             if (json == null)
-                throw new ArgumentException("argument 'json' == null");
+                throw new ArgumentException("json");
 
             this.characters = json.ToCharArray();
             this.currentIndex = 0;
-            this.MoveToNonWhitespaceCharacter();
         }
 
         private object ParseValue()
-        {
+        {            
             object result = null;
+
+            this.MoveToNonWhitespaceCharacter();
 
             if (this.IsAtStringDelimiter)
                 result = this.ParseString();
@@ -141,8 +142,10 @@ namespace Json
             else if (this.IsAtNullStart)
                 result = this.ParseNull();
             else
-                throw new FormatException(string.Format("invalid character at position {0}",
+                throw new FormatException(string.Format("Invalid character at position {0}.",
                     this.currentIndex));
+
+            this.MoveToNonWhitespaceCharacter();
 
             return result;
         }
@@ -192,6 +195,7 @@ namespace Json
         {
             StringBuilder result = new StringBuilder();
 
+            this.MoveToNonWhitespaceCharacter();
             this.ParseStringDelimiter();
 
             while (!this.IsAtStringDelimiter)
@@ -202,15 +206,16 @@ namespace Json
                 }
                 else if (this.IsAtEscapeSequence)
                 {
-                    result.Append(this.ParseSingleCharacterEscapeSequence());
+                    result.Append(this.ParseEscapeSequence());
                 }
                 else
                 {
-                    result.Append(this.ParseSingleCharacter());
+                    result.Append(this.ParseCharacter());
                 }
             }
 
             this.ParseStringDelimiter();
+            this.MoveToNonWhitespaceCharacter();
 
             return result.ToString();
         }
@@ -222,7 +227,7 @@ namespace Json
 
             if (!Double.TryParse(numberText, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
             {
-                throw new Exception("invalid json string");
+                throw new Exception("Invalid json string.");
             }
 
             return result;
@@ -242,13 +247,12 @@ namespace Json
                 this.currentIndex += 5;
             }
 
-            this.MoveToNonWhitespaceCharacter();
             return result;
         }
         private object ParseNull()
         {
             this.currentIndex += 4;
-            this.MoveToNonWhitespaceCharacter();
+
             return null;
         }
         private string ParseNumberText()
@@ -266,54 +270,44 @@ namespace Json
             }
 
             this.currentIndex += result.Length;
-            this.MoveToNonWhitespaceCharacter();
 
             return result.ToString();
         }
         private void ParseObjectStart()
         {
-            this.ParseCharacter('{');
+            this.ParseExpectedCharacter('{');
         }
         private void ParseObjectEnd()
-        { 
-            this.ParseCharacter('}');
+        {
+            this.ParseExpectedCharacter('}');
         }
         private void ParseArrayStart()
         {
-            this.ParseCharacter('[');
+            this.ParseExpectedCharacter('[');
         }
         private void ParseArrayEnd()
         {
-            this.ParseCharacter(']');
-        }
-        private void ParseCollectionSeparator()
-        {
-            this.ParseCharacter(',');
-        }
-        private void ParseKeyValuePairSeparator()
-        {
-            this.ParseCharacter(':');
+            this.ParseExpectedCharacter(']');
         }
         private void ParseStringDelimiter()
         {
-            this.MoveToNonWhitespaceCharacter();
-
-            if (!this.IsAtStringDelimiter)
-            {
-                string message = string.Format("expected '\"' at position {0} but is '{1}'",
-                    this.currentIndex, this.CurrentCharacter);
-                throw new FormatException(message);
-            }
-
-            this.currentIndex += 1;
+            this.ParseExpectedCharacter('"');
         }
-        private char ParseSingleCharacter()
+        private void ParseCollectionSeparator()
+        {
+            this.ParseExpectedCharacter(',');
+        }
+        private void ParseKeyValuePairSeparator()
+        {
+            this.ParseExpectedCharacter(':');
+        }
+        private char ParseCharacter()
         {
             char result = this.CurrentCharacter;
             this.currentIndex += 1;
             return result;
         }
-        private char ParseSingleCharacterEscapeSequence()
+        private char ParseEscapeSequence()
         {
             char result = Char.MinValue;
 
@@ -353,7 +347,7 @@ namespace Json
             }
             else
             {
-                string message = string.Format("invalide esquape sequence at position {0}",
+                string message = string.Format("Invalide esquape sequence at position {0}.",
                     this.currentIndex);
                 throw new FormatException(message);
             }
@@ -370,7 +364,7 @@ namespace Json
 
             if (this.characters.Length - this.currentIndex < 4)
             {
-                string message = string.Format("expected unicode character sequence of length 4 but only {0} characters are left",
+                string message = string.Format("Expected unicode character sequence of length 4 but only {0} characters are left.",
                     this.characters.Length - this.currentIndex);
                 throw new FormatException(message);
             }
@@ -379,7 +373,7 @@ namespace Json
             int unicodeNumber;
             if (!Int32.TryParse(unicodeSequence, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out unicodeNumber))
             {
-                string message = string.Format("expected valid unicode sequence at position {0}",
+                string message = string.Format("Expected valid unicode sequence at position {0}.",
                     this.currentIndex);
                 throw new FormatException(message);
             }
@@ -389,18 +383,14 @@ namespace Json
 
             return result;
         }
-        private void ParseCharacter(char c)
+        private void ParseExpectedCharacter(char c)
         {
-            this.MoveToNonWhitespaceCharacter();
-
             if (!this.CurrentCharacter.Equals(c))
             {
-                string message = string.Format("expected '{0}' at position {1} but is '{2}'");
+                string message = string.Format("Expected '{0}' at position {1} but is '{2}'.", c, this.currentIndex, this.CurrentCharacter);
                 throw new FormatException(message);
             }
             this.currentIndex += 1;
-
-            this.MoveToNonWhitespaceCharacter();
         }
 
         private void MoveToNonWhitespaceCharacter()
