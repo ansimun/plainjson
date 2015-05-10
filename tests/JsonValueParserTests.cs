@@ -16,21 +16,15 @@ namespace Tests.Parser
         }
 
         [Test()]
+        [ExpectedException(typeof(FormatException))]
         public void ParseEmptyJsonString()
         {
-            try
-            {
-                JsonParser testInstance = new JsonParser();
-                testInstance.Parse("");
-                Assert.Fail();
-            }
-            catch (FormatException)
-            {
-            }
+            JsonParser testInstance = new JsonParser();
+            testInstance.Parse("");
         }
 
         [Test()]
-        public void ParsePrettyObject()
+        public void ParsePrettifiedObject()
         {
             JsonParser testInstance = new JsonParser();
             Hashtable result = testInstance.Parse("{"
@@ -51,6 +45,16 @@ namespace Tests.Parser
             Assert.AreEqual(2, (result["C"] as IList).Count);
             Assert.AreEqual("test", (result["C"] as IList)[0]);
             Assert.AreEqual(20.0, (result["C"] as IList)[1]);
+        }
+
+        [Test()]
+        [ExpectedException(typeof(FormatException))]
+        public void ParseImplicitNewLine()
+        {
+            JsonParser testInstance = new JsonParser();
+            string text = "{ \"name\": \"Line1\nLine2\" }";
+
+            testInstance.Parse(text);
         }
     }
 }
