@@ -154,6 +154,7 @@ namespace Json
             Hashtable result = new Hashtable();
 
             this.ParseObjectStart();
+            this.MoveToNonWhitespaceCharacter();
 
             while (!this.IsAtObjectEnd)
             {
@@ -177,6 +178,7 @@ namespace Json
             ArrayList result = new ArrayList();
 
             this.ParseArrayStart();
+            this.MoveToNonWhitespaceCharacter();
 
             while (!this.IsAtArrayEnd)
             {

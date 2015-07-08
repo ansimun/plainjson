@@ -30,6 +30,15 @@ namespace Tests.Parser
         }
 
         [Test()]
+        public void ParseEmptyArrayIncludingWhitespace()
+        {
+            JsonParser testInstance = new JsonParser();
+            ArrayList result = new ArrayList(testInstance.Parse("[ \t\n\r ]") as IList);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test()]
         public void ParseStringArray()
         {
             JsonParser testInstance = new JsonParser();

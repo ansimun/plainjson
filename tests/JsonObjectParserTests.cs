@@ -18,6 +18,15 @@ namespace Tests.Parser
         }
 
         [Test()]
+        public void ParseEmptyObjectIncludingWhitespace()
+        {
+            JsonParser parser = new JsonParser();
+            Hashtable result = parser.Parse("{  }") as Hashtable;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test()]
         public void ParseObject() 
         {
             JsonParser parser = new JsonParser();
